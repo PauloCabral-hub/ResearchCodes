@@ -80,7 +80,7 @@ plot(cloud_x(:,a), cloud_y(:,a), 'ob', 'MarkerSize', 10, 'MarkerFaceColor', 'b')
 end
 
 for a = 1:size(cloud_x,1)
-plot(cloud_x(a,:), cloud_y(a,:), '--', 'Color', [0.25 0.25 0.25],'LineWidth',2) 
+plot(cloud_x(a,:), cloud_y(a,:), '-', 'Color', 'b','LineWidth',0.25) 
 end
 
 if test ==1
