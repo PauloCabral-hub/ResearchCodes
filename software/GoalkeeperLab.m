@@ -1,6 +1,9 @@
-function GoalkeeperLab(data,pathtogit,ntrials,EEGsignals, fs, channels)
-
-
+function GoalkeeperLab(data,pathtogit,ntrials,EEGsignals,fs,channels)
+%% Managing other windows
+other_win = findobj('Name','Goalkeeper Lab');
+    if ~isempty(other_win)
+        close(other_win)
+    end
 %% Defining renderer and getting paths
 set(0,'defaultfigurecolor',[1 1 1]); %set(0, 'DefaultFigureRenderer', 'painters');
 addpath(genpath(pathtogit))
@@ -9,7 +12,9 @@ addpath(genpath(pathtogit))
 strfig.data = data; % data to be associated to the GUI
 strfig.EEGsignals = EEGsignals; % eeg data to be associated to the GUI
 strfig.fs = fs;
+strfig.FontChoice = 10;
 strfig.channels = channels;
+strfig.edit_tags = {'vol'; 'tree'; 'mintime'; 'maxtime'; 'context'; 'fromtrial'; 'totrial'; 'position'; 'laksis'; 'raksis'; 'bwid'; 'low'; 'high'; 'ch'; 'filter'};
 
 assignin('base','aux',0); % assing value for workspace variable
 f = figure('Name','Goalkeeper Lab','NumberTitle','off');
@@ -27,7 +32,7 @@ column1 = 0.92:-0.06:(0.92-numfilds1*(0.06));
 % LABEL VOLUNTEER
 lvolfield = uicontrol(f,'Style','text','String', 'VOLUNTEER:', 'FontWeight','bold','FontName','Palatino','FontSize',12);
 lvolfield.Units = 'normalized'; lvolfield.Position = [0.5 column1(1) 0.07 0.05];
-lvolfield.BackgroundColor = [1 1 1]; uicontrol(lvolfield);
+lvolfield.BackgroundColor = [1 1 1]; uicontrol(lvolfield); lvolfield.Tag = 'text_field1';
 % FIELD VOLUNTEER
 volfield = uicontrol(f,'Style','edit','Units','normalized'); 
 volfield.Position = [0.50625 column1(1) 0.06 0.02]; uicontrol(volfield); volfield.Tag = 'vol';
@@ -35,7 +40,8 @@ volfield.Position = [0.50625 column1(1) 0.06 0.02]; uicontrol(volfield); volfiel
 % LABEL TREE
 ltreefield = uicontrol(f,'Style','text','String', 'TREE: ','FontWeight','bold','FontName','Palatino','FontSize',12);
 ltreefield.Units = 'normalized'; ltreefield.Position = [0.485 column1(2) 0.07 0.05];
-ltreefield.BackgroundColor = [1 1 1];uicontrol(ltreefield);
+ltreefield.BackgroundColor = [1 1 1];uicontrol(ltreefield); ltreefield.Tag = 'text_field2';
+
 % FILED TREE
 taufield = uicontrol(f,'Style','edit','Units','normalized'); 
 taufield.Position = [0.50625 column1(2) 0.06 0.02]; uicontrol(taufield); taufield.Tag = 'tree';
@@ -43,28 +49,33 @@ taufield.Position = [0.50625 column1(2) 0.06 0.02]; uicontrol(taufield); taufiel
 % LABEL MINIMAL VALUE OF THE RESPONSE TIME
 lleftl = uicontrol(f,'Style','text','String', 'MIN TIME: ','FontWeight','bold','FontName','Palatino','FontSize',12);
 lleftl.Units = 'normalized'; lleftl.Position = [0.4975 column1(3) 0.07 0.05];
-lleftl.BackgroundColor = [1 1 1]; uicontrol(lleftl);
+lleftl.BackgroundColor = [1 1 1]; uicontrol(lleftl); lleftl.Tag = 'text_field3';
+
 % FIELD MINIMAL VALUE OF THE RESPONSE TIME
 leftl = uicontrol(f,'Style','edit','Units','normalized'); leftl.Position = [0.50625 column1(3) 0.06 0.02]; uicontrol(leftl); leftl.Tag = 'mintime';
 
 % LABEL MAXIMUM VALUE OF THE RESPONSE TIME
 lrightl = uicontrol(f,'Style','text','String', 'MAX TIME: ','FontWeight','bold','FontName','Palatino','FontSize',12);
 lrightl.Units = 'normalized'; lrightl.Position = [(lleftl.Position(1)+0.0825) column1(3) 0.07 0.05];
-lrightl.BackgroundColor = [1 1 1]; uicontrol(lrightl);
+lrightl.BackgroundColor = [1 1 1]; uicontrol(lrightl); lrightl.Tag = 'text_field4';
+
 % FIELD MAXIMUM VALUE OF THE RESPONSE TIME
 rightl = uicontrol(f,'Style','edit','Units','normalized'); rightl.Position = [(lleftl.Position(1)+0.09) column1(3) 0.06 0.02]; uicontrol(leftl); rightl.Tag = 'maxtime';
 
 % LABEL CONTEXT
-lwcxt = uicontrol(f,'Style','text','String', 'CONTEXT(W): ','FontWeight','bold','FontName','Palatino','FontSize',12);
-lwcxt.Units = 'normalized'; lwcxt.Position = [0.505 column1(4) 0.07 0.05];
-lwcxt.BackgroundColor = [1 1 1]; uicontrol(lwcxt);
+lwctx = uicontrol(f,'Style','text','String', 'CONTEXT(W): ','FontWeight','bold','FontName','Palatino','FontSize',12);
+lwctx.Units = 'normalized'; lwctx.Position = [0.505 column1(4) 0.07 0.05];
+lwctx.BackgroundColor = [1 1 1]; uicontrol(lwctx); lwctx.Tag = 'text_field5';
+
 % FIELD CONTEXT
-wcxt = uicontrol(f,'Style','edit','Units','normalized'); wcxt.Position = [0.50625 column1(4) 0.06 0.02]; uicontrol(wcxt); wcxt.Tag = 'context';
+wctx = uicontrol(f,'Style','edit','Units','normalized'); wctx.Position = [0.50625 column1(4) 0.06 0.02]; uicontrol(wctx); wctx.Tag = 'context';
 
 % LABEL FROM TRIAL
 lfromtrial = uicontrol(f,'Style','text','String', 'FROM TRIAL: ','FontWeight','bold','FontName','Palatino','FontSize',12);
 lfromtrial.Units = 'normalized'; lfromtrial.Position = [0.505 column1(5) 0.07 0.05];
 lfromtrial.BackgroundColor = [1 1 1]; lfromtrial.BackgroundColor = [1 1 1]; uicontrol(lfromtrial);
+lfromtrial.Tag = 'text_field6';
+
 % FIELD FROM TRIAL
 fromtrial = uicontrol(f,'Style','edit','Units','normalized'); fromtrial.Position = [0.50625 column1(5) 0.06 0.02]; uicontrol(fromtrial); fromtrial.Tag = 'fromtrial';
 
@@ -72,19 +83,25 @@ fromtrial = uicontrol(f,'Style','edit','Units','normalized'); fromtrial.Position
 ltotrial = uicontrol(f,'Style','text','String', 'TO TRIAL: ','FontWeight','bold','FontName','Palatino','FontSize',12);
 ltotrial.Units = 'normalized'; ltotrial.Position = [(lleftl.Position(1)+0.0825) column1(5) 0.07 0.05];
 ltotrial.BackgroundColor = [1 1 1]; uicontrol(ltotrial);
+ltotrial.Tag = 'text_field7';
+
 % FIELD TO TRIAL
 totrial = uicontrol(f,'Style','edit','Units','normalized'); totrial.Position = [(lleftl.Position(1)+0.09) column1(5) 0.06 0.02]; uicontrol(totrial);totrial.Tag = 'totrial';
 
 % LABEL APPLY MODEL
 lexpomodel = uicontrol(f,'Style','text','String', ' APPLY MODEL: ','FontWeight','bold','FontName','Palatino','FontSize',12);
 lexpomodel.Units = 'normalized'; lexpomodel.Position = [0.495 column1(6) 0.09 0.05]; lexpomodel.BackgroundColor = [1 1 1]; uicontrol(lexpomodel);
+lexpomodel.Tag = 'text_field8';
+
 % FIELD MODEL
 model = uicontrol(f,'Style','popupmenu','Units','normalized');model.Position = [0.50625 column1(6) 0.06 0.02];
-model.String = {'None','Exponential','Normal','Gamma','Lognormal'}; model.Value = 1; 
+model.String = {'None','Exponential','Normal','Gamma','Lognormal'}; model.Value = 1; model.Tag = 'misc2';
 
 % LABEL ADVANCED OPTIONS
 lfilterrate = uicontrol(f,'Style','text','String', 'ADV. OPTIONS: ','FontWeight','bold','FontName','Palatino','FontSize',12); 
 lfilterrate.Units = 'normalized'; lfilterrate.Position = [0.4975 column1(7) 0.09 0.05]; lfilterrate.BackgroundColor = [1 1 1]; uicontrol(lfilterrate);
+lfilterrate.Tag = 'text_field9';
+
 %FIELD ADVANCED OPTIONS
 filterrate = uicontrol(f,'Style','radiobutton','String','Option 1','String', 'APPLY','FontWeight','bold','FontName','Palatino','FontSize',12); 
 filterrate.Units = 'normalized'; filterrate.Position = [0.50625 (column1(7)+0.005) 0.06 0.02]; filterrate.BackgroundColor = [1 1 1]; filterrate.Tag = 'filter';
@@ -92,54 +109,71 @@ filterrate.Units = 'normalized'; filterrate.Position = [0.50625 (column1(7)+0.00
 % LABEL PREVIOUS GUESS
 lposit = uicontrol(f,'Style','text','String', 'PREVIOUS GUESS: ','FontWeight','bold','FontName','Palatino','FontSize',12); 
 lposit.Units = 'normalized'; lposit.Position = [0.505 column1(8) 0.09 0.05]; lposit.BackgroundColor = [1 1 1];uicontrol(lposit);
+lposit.Tag = 'text_field10';
+
 % FIELD PREVIOUS GUESS
 posit = uicontrol(f,'Style','edit'); posit.Units = 'normalized'; posit.Position = [0.50625 column1(8) 0.06 0.02]; posit.Tag = 'position';
 
 % FIELD CORRECT/INCORRECT
 conditioning = uicontrol(f,'Style','popupmenu','String',{'NONE','CORRECT','INCORRECT'});
 conditioning.Units = 'normalized'; conditioning.Position = [(0.50625+0.075) column1(8) 0.06 0.02]; conditioning.Tag = 'condition';
+conditioning.Tag = 'misc3';
 
 % LABEL FREQUENCY PLOT
 lfplot = uicontrol(f,'Style','text','FontWeight','bold','FontName','Palatino','FontSize',12); 
 lfplot.String = 'FREQUENCY PLOT'; lfplot.Units = 'normalized'; lfplot.Position = [0.49 column1(9) 0.12 0.02]; lfplot.BackgroundColor = [1 1 1]; uicontrol(lfplot);
+lfplot.Tag = 'text_field11';
 
 % LABEL L.AXIS
 llaksis = uicontrol(f,'Style','text','String', 'L.AXIS: ','FontWeight','bold','FontName','Palatino','FontSize',12); 
 llaksis.Units = 'normalized'; llaksis.Position = [0.48 column1(10) 0.09 0.05]; llaksis.BackgroundColor = [1 1 1]; uicontrol(llaksis);
+llaksis.Tag = 'text_field12';
+
 % FIELD L.AXIS
 laksis = uicontrol(f,'Style','edit'); laksis.Units = 'normalized'; laksis.Position = [0.55 (column1(9)-0.03) 0.06 0.02]; uicontrol(laksis); laksis.Tag = 'laksis';
 
 % LABEL R.AXIS
 lraksis = uicontrol(f,'Style','text','String', 'R.AXIS: ','FontWeight','bold','FontName','Palatino','FontSize',12);
 lraksis.Units = 'normalized'; lraksis.Position = [0.48 (column1(11)+0.03) 0.09 0.05]; lraksis.BackgroundColor = [1 1 1]; uicontrol(lraksis);
+lraksis.Tag = 'text_field13';
+
 % FIELD R.AXIS
 raksis = uicontrol(f,'Style','edit'); raksis.Units = 'normal'; raksis.Position = [0.55 column1(10) 0.06 0.02]; uicontrol(raksis); raksis.Tag = 'raksis';
 
 % LABEL BIN WIDTH
 lbwidfield = uicontrol(f,'Style','text','String', 'BIN WIDTH: ','FontWeight','bold','FontName','Palatino','FontSize',12);
 lbwidfield.Units = 'normalized'; lbwidfield.Position = [0.49 (column1(12)+0.05) 0.09 0.05]; lbwidfield.BackgroundColor = [1 1 1]; uicontrol(lbwidfield);
+lbwidfield.Tag = 'text_field14';
+
 % FIELD BIN WIDTH
 bwidfield = uicontrol(f,'Style','edit'); bwidfield.Units = 'normalized'; bwidfield.Position = [0.505 column1(11) 0.06 0.02]; uicontrol(bwidfield); bwidfield.Tag = 'bwid';
 
 % LABEL EEG FILTERING:
 leegfilt = uicontrol(f,'Style','text','String', 'EEG FILTERING:','FontWeight','bold','FontName','Palatino','FontSize',12);
 leegfilt.Units = 'normalized'; leegfilt.Position = [0.448 0.075 0.108 0.027]; leegfilt.BackgroundColor = [1 1 1]; uicontrol(leegfilt);
+leegfilt.Tag = 'text_field15';
 
 % LABEL LOW:
 llow = uicontrol(f,'Style','text','String', 'LOW:','FontWeight','bold','FontName','Palatino','FontSize',12);
 llow.Units = 'normalized'; llow.Position = [0.463 0.031 0.03 0.026]; llow.BackgroundColor = [1 1 1]; uicontrol(llow);
+llow.Tag = 'text_field16';
+
 % FIELD LOW:
 lowfield = uicontrol(f,'Style','edit'); lowfield.Units = 'normalized'; lowfield.Position = [0.505 0.038 0.06 0.02]; uicontrol(lowfield); lowfield.Tag = 'low';
 
 % LABEL HIGH:
 lhigh = uicontrol(f,'Style','text','String', 'HIGH:','FontWeight','bold','FontName','Palatino','FontSize',12);
 lhigh.Units = 'normalized'; lhigh.Position = [0.575 0.029 0.03 0.026]; lhigh.BackgroundColor = [1 1 1]; uicontrol(lhigh);
+lhigh.Tag = 'text_field17';
+
 % FIELD HIGH:
 highfield = uicontrol(f,'Style','edit'); highfield.Units = 'normalized'; highfield.Position = [0.609 0.036 0.06 0.02]; uicontrol(highfield); highfield.Tag = 'high';
 
 % LABEL CHANNEL:
 lch = uicontrol(f,'Style','text','String', 'CH:','FontWeight','bold','FontName','Palatino','FontSize',12);
 lch.Units = 'normalized'; lch.Position = [0.58 0.075 0.022 0.027]; lch.BackgroundColor = [1 1 1]; uicontrol(lch);
+lch.Tag = 'text_field18';
+
 % FIELD CHANNEL:
 chfield = uicontrol(f,'Style','edit'); chfield.Units = 'normalized'; chfield.Position = [0.608 0.084 0.06 0.02]; uicontrol(chfield); chfield.Tag = 'ch';
 
@@ -147,36 +181,41 @@ chfield = uicontrol(f,'Style','edit'); chfield.Units = 'normalized'; chfield.Pos
 savecurrentd = uicontrol(f,'Style','pushbutton');
 savecurrentd.Units = 'normalized'; savecurrentd.Position = [0.505 (column1(12)+0.02) 0.08 0.02]; 
 savecurrentd.String = 'SAVE DISTRIBUTION'; uicontrol(savecurrentd);
-savecurrentd.Callback = @savingdata;
+savecurrentd.Callback = @savingdata; savecurrentd.Tag = 'button1';
 
 cleard = uicontrol(f,'Style','pushbutton'); 
 cleard.Units = 'normalized'; cleard.Position = [0.505 (column1(12)-0.01) 0.10 0.02]; 
 cleard.String = 'CLEAR DISTRIBUTION(S)'; uicontrol(cleard);
-cleard.Callback = @cleardists;
+cleard.Callback = @cleardists; cleard.Tag = 'button2';
 
 testd = uicontrol(f,'Style','pushbutton');
 testd.Units = 'normalized'; testd.Position = [0.505 (column1(13)+0.02) 0.08 0.02]; 
 testd.String = 'TEST DISTRIBUTIONS'; uicontrol(testd);
-testd.Callback = @TestDist;
+testd.Callback = @TestDist; testd.Tag = 'button3';
 
 updateb = uicontrol(f,'Style','pushbutton');
 updateb.Units = 'normalized'; updateb.Position = [0.58 column1(1) 0.08 0.02]; 
 updateb.String = 'UPDATE'; uicontrol(updateb);
-updateb.Callback = @upthedata;
+updateb.Callback = @upthedata; updateb.Tag = 'button4';
 
 clresul = uicontrol(f,'Style','pushbutton');
 clresul.Units = 'normalized'; clresul.Position = [0.505 (column1(13)+-0.01) 0.08 0.02]; 
 clresul.String = 'CLEAR RESULTS'; uicontrol(clresul);
-clresul.Callback = @clresults; 
+clresul.Callback = @clresults; clresul.Tag = 'button5';
 
 upeegdata = uicontrol(f,'Style','pushbutton');
 upeegdata.Units = 'normalized'; upeegdata.Position = [0.506 0.135 0.07 0.032]; 
 upeegdata.String = 'upload EEG data'; uicontrol(upeegdata);
-upeegdata.Callback = @upeeg; % write the function
+upeegdata.Callback = @upeeg; upeegdata.Tag = 'button6';
+
+% SLIDERS
+fslid = uicontrol(f, 'Style', 'slider', 'Units', 'normalized','Position', [0.002 0 0.0400 0.02]);
+fslid.SliderStep = [1/2 1];
+fslid.Value = 0; fslid.Callback = @changefsize;
 
 % FIELD REFERENCE
 timereference = uicontrol(f,'Style','popupmenu','Units','normalized');timereference.Position = [0.6088 0.1249 0.0584 0.0375];
-timereference.String = {'Pre-response','Post-response'}; timereference.Value = 2; 
+timereference.String = {'Pre-response','Post-response'}; timereference.Value = 2; timereference.Tag = 'misc1';
 
 %% CALL-OUT FUNCTIONS
 
@@ -245,6 +284,7 @@ timereference.String = {'Pre-response','Post-response'}; timereference.Value = 2
        info = [1:length(channels)]';
        cinfo = {'n.'};
        chanref = uitable(findobj('Tag','goalkeeperlab'),'Data',info,'ColumnName', cinfo, 'RowName',channels,'Units', 'normalized','Position', [0.431 0.224 0.071 0.721], 'Tag', 'EEGchannels');
+       chanref.FontSize = strfig.FontChoice;
     end
 
     for a = 1:length(t_id)
@@ -320,7 +360,7 @@ timereference.String = {'Pre-response','Post-response'}; timereference.Value = 2
     h.String = ['TOTAL: ' num2str(counts_total(p,posw)) ' SRATE = (' num2str(srate) ')'];
  
     % Plotting data
-    ax1 = axes('Position', [ 0.05 0.55 0.375 0.4]); ax1.Tag = 'axes1'; ax1.NextPlot = 'add'; % SUBSTITUTES THE LINE ABOVE IN MATLAB2015
+    ax1 = axes('Position', [ 0.05 0.55 0.36 0.4]); ax1.Tag = 'axes1'; ax1.NextPlot = 'add'; % SUBSTITUTES THE LINE ABOVE IN MATLAB2015
     axes(ax1)
     xlabel('time (sec.)'); ylabel('frequency')
     X = tau_repo{p,posw};
@@ -595,32 +635,31 @@ timereference.String = {'Pre-response','Post-response'}; timereference.Value = 2
     % Button for visualizing the spectra
     uicontrol(findobj('Tag','goalkeeperlab'),'Style','pushbutton','Tag','freqdom','Units','normalized','Position',...
         [0.9249 0.9448 0.0558 0.0343], 'String', 'Freq. Domain', 'Tag', 'freqdom');
-    freqdom = findobj('Tag','freqdom');
+    freqdom = findobj('Tag','freqdom'); freqdom.FontSize = strfig.FontChoice;
     freqdom.Callback = @showspec;
     
     % Button for gathering data of all EEG channels
     uicontrol(findobj('Tag','goalkeeperlab'),'Style','pushbutton','Tag','gathereeg','Units','normalized','Position',...
         [0.9417 0.0040 0.0558 0.0343], 'String', 'Gather EEG');
-    gathereeg = findobj('Tag','gathereeg');
+    gathereeg = findobj('Tag','gathereeg'); gathereeg.FontSize = strfig.FontChoice;
     uicontrol(gathereeg);
     gathereeg.Callback = @callgathereeg;
-    
-    
+        
     % Button indicating the occurance
     uicontrol(findobj('Tag','goalkeeperlab'),'Style','edit','Units','normalized','Tag','trialshown','Position', [0.7967 0.9526 0.0600 0.0200],...
         'String', num2str(1), 'Enable', 'off');
-    trialshown = findobj('Tag','trialshown'); 
+    trialshown = findobj('Tag','trialshown'); trialshown.FontSize = strfig.FontChoice;
     uicontrol(trialshown); 
     
     % Buttons for changing the ocurrance
     uicontrol(findobj('Tag','goalkeeperlab'),'Style','pushbutton','Units','normalized','Tag','prev','Position', [0.7546 0.9523 0.0351 0.0200],...
         'String', 'Prev.');
-    prev = findobj('Tag','prev'); 
+    prev = findobj('Tag','prev'); prev.FontSize = strfig.FontChoice;
     uicontrol(prev); prev.Callback = @change2prev;
     
     uicontrol(findobj('Tag','goalkeeperlab'),'Style','pushbutton','Units','normalized','Tag','next','Position', [0.8628 0.9512 0.0351 0.0200],...
         'String', 'Next');
-    next = findobj('Tag','next'); 
+    next = findobj('Tag','next'); next.FontSize = strfig.FontChoice;
     uicontrol(next); next.Callback = @change2next;
    
     end
@@ -753,7 +792,39 @@ timereference.String = {'Pre-response','Post-response'}; timereference.Value = 2
          end
     disp('Done gathering.');
     end
-
+ % SECONDARY CALL (9)
+    function changefsize(fslid,~)
+    strfig = guidata(updateb);
+    edit_taglist = strfig.edit_tags;
+            choice = fslid.Value;
+        if abs(choice-0)< 10^(-5)
+            strfig.FontChoice = 8;
+        elseif abs(choice-1/2)< 10^(-5)
+            strfig.FontChoice = 10;
+        elseif abs(choice-1)< 10^(-5)
+            strfig.FontChoice = 12;
+        else
+        end    
+    taglabel = 'text_field';
+        for a = 1:18
+            obj = findobj('Tag',[taglabel num2str(a)]);
+            obj.FontSize = strfig.FontChoice;
+        end
+    taglabel = 'button';
+        for a = 1:6
+            obj = findobj('Tag',[taglabel num2str(a)]);
+            obj.FontSize = strfig.FontChoice;
+        end
+        taglabel = 'misc';
+        for a = 1:3
+            obj = findobj('Tag',[taglabel num2str(a)]);
+            obj.FontSize = strfig.FontChoice;
+        end
+        for a = 1:size(edit_taglist,1)
+            obj = findobj('Tag',edit_taglist{a,1});
+            obj.FontSize = strfig.FontChoice;
+        end        
+    end
 ltotal = uicontrol(f,'Style','text','String', ''); ltotal.Units = 'normalized'; ltotal.Position = [0.236 0.448 0.15 0.025]; ltotal.BackgroundColor = [1 1 1]; uicontrol(ltotal);ltotal.Tag = 'total';
 ksresult = uicontrol(f,'Style','text','String', ''); ksresult.Units = 'normalized'; ksresult.Tag = 'ksresult'; ksresult.Position = [0.8101 0.2461 0.15 0.025]; ksresult.BackgroundColor = [1 1 1]; uicontrol(ksresult);
 end

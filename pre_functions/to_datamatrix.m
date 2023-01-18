@@ -1,4 +1,4 @@
-% [data, channels, EEGtimes, EEGsignals] = to_datamatrix(ALLEEG, ntrials, fs, idnum, tau)
+% [data, channels, EEGtimes, EEGsignals] = to_datamatrix(ALLEEG, ntrials, fs, idnum, tau, correction)
 %
 % Transforms the data of the Goalkeeper experiment into the matrix used in
 % Goalkeeper lab. Various matrices could be concatenated to form the final
@@ -18,7 +18,7 @@
 % EEGtimes = vector with the time vector of the experiment
 % EEGsignals = Data with EEG signals.
 %
-% Author: Paulo Roberto Cabral Passos     Last modified = 17/10/2022
+% Author: Paulo Roberto Cabral Passos     Last modified = 11/10/2023
 
 
 function [data, channels, EEGtimes, EEGsignals] = to_datamatrix(ALLEEG, ntrials, fs, idnum, tau, correction)
