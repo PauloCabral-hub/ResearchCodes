@@ -5,3 +5,4 @@ tau = 7; idnum = 1;
 ntrials = 1500; correction = 1;
 [data, channels, EEGtimes, EEGsignals] = to_datamatrix(EEG, ntrials, fs, idnum, tau, correction);
 GoalkeeperLab(data,pathtogit,ntrials,EEGsignals, fs, channels)
+

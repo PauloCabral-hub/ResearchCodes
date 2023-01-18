@@ -1,21 +1,16 @@
-function base_script2()
-    fig = figure;
-    fslid = uicontrol(fig, 'Style', 'slider', 'Units', 'normalized','Position', [0.002 0 0.0400 0.02]);
-    fslid.SliderStep = [1/3 1];
-    fslid.Value = 2/3; fslid.Callback = @changefsize;
+% Simulations for testing the function:
 
-    tobj = uicontrol(fig, 'Style', 'text', 'Units', 'normalized', 'Position', [0.5 0.5 0.15 0.05]);
-    tobj.String = 'Generic Text'; tobj.Tag = 'tx';
+pathtogit = '/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/research_codes';
+addpath(genpath(pathtogit))
+tau = 7;
+tree_file_address = [pathtogit '/files_for_reference/tree_behave' num2str(tau) '.txt'];
+[contexts, PM,~ , ~] = build_treePM (tree_file_address);
+num = 200; % defining the number of elements in the chain
+chain = gentau_seq ([0 1 2], contexts, PM, num);
 
-    function changefsize(fslid,~)
-    obj = findobj('Tag','tx');
-    choice = fslid.Value;
-        if abs(choice-1/3)< 10^(-3)
-            obj.FontSize = 8;
-        elseif abs(choice-2/3)< 10^(-3)
-            obj.FontSize = 10;
-        else
-            obj.FontSize = 12;
-        end
-    end
-end
+figure
+subplot(1,2,1)
+rts = gen_rts(partition, chain, 0.3, 1);
+alphal = 3;
+subplot(1,2,2)
+[tau_est] = tauest_RT(alphal, rts, chain, 1);
