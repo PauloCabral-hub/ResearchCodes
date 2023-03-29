@@ -8,6 +8,7 @@ tree_file_address = [pathtogit '/files_for_reference/tree_behave' num2str(tau) '
 num = 200; % defining the number of elements in the chain
 chain = gentau_seq ([0 1 2], contexts, PM, num);
 
+partition = {[0], [1], [2]};
 figure
 subplot(1,2,1)
 rts = gen_rts(partition, chain, 0.3, 1);
