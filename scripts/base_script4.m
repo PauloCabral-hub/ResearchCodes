@@ -34,7 +34,7 @@ end
 load('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/data_files_r04/estimated_trees_epochs28032023.mat')
 num_part = size(est_trees,1);
 all_retrieved = {};
-ep = 2; aux_add = 1;
+ep = 3; aux_add = 1;
 for p = 1:size(est_trees,1)
     tree = est_trees{p,ep};
     for w = 1:size(tree,2)
@@ -249,5 +249,43 @@ g_ax = gca;
 xinterval = abs(g_ax.XLim(2)-g_ax.XLim(1));
 for c = 1:length(all_retcounts)
     plot( min(g_ax.XLim)+c*xinterval/length(all_retcounts), max(g_ax.YLim),'ob','MarkerFaceColor','b','MarkerSize', (all_retcounts(1,c)/num_part)*40)
-    text(min(g_ax.XLim)+c*xinterval/length(all_retcounts)+ 0.35, max(g_ax.YLim), num2str(all_retcounts(1,c)))
+    text(min(g_ax.XLim)+c*xinterval/length(all_retcounts)+ 0.425, max(g_ax.YLim), num2str(all_retcounts(1,c)))
 end
+
+%% Preparing the individual trees
+% preparing the figures
+set(0, 'DefaultFigureRenderer', 'painters')
+set(0, 'DefaultFigureColor', [1 1 1] )
+load('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/data_files_r04/estimated_trees_epochs28032023.mat')
+close all
+
+ep = 1; tit_tip = [2 5 8]; sub_tip = [1 2 3; 4 5 6; 7 8 9]; part_tip = [1 3; 4 6; 7 9; 10 12; 13 15; 16 18; 19 21; 22 22 ];
+fig_trees = figure;
+p_segment = 8;
+for p = part_tip(p_segment,1):part_tip(p_segment,2)
+    for ep = 1:3
+        w = sub_tip(p - part_tip(p_segment-1,2),ep);
+        subplot(3,3,w)
+        if sum(ep == tit_tip)
+           title(['p' num2str(p)])    
+        end
+        tree = est_trees{p,ep};
+        draw_contexttree(tree, [0 1 2], [0 0 0])
+        lines = findobj('Type','line');
+        texts = findobj('Type','text');
+        for l = 1:length(lines)
+            lines(l).LineWidth = 3;
+        end
+        for t = 1:length(texts)
+            if length(texts(t).String) > 4
+               texts(t).FontSize = 8;
+            elseif length(texts(t).String) > 3
+               texts(t).FontSize = 10;
+            else
+               texts(t).FontSize = 12;
+            end
+        end
+    end
+end
+
+saveas(gcf,['/home/roberto/Documents/pos-doc/article/painel2_parts/trees_part' num2str(part_tip(p_segment,1)) '-' num2str(part_tip(p_segment,2)) '.png' ])
