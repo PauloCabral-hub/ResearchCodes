@@ -1,6 +1,6 @@
 height = 3;
 alphabet = [0 1 2];
-pathtogit = '/home/paulo/Documents/PauloPosDoc/Pos-Doc/ResearchCodes'; tau = 7; seq_length = 100;
+pathtogit = '/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/ResearchCodes'; tau = 7; seq_length = 100;
 tree_file_address = [pathtogit '/files_for_reference/tree_behave' num2str(tau) '.txt' ];
 [contexts, PM,~ , ~] = build_treePM (tree_file_address);
 seq = gentau_seq (alphabet, contexts, PM, seq_length);
@@ -24,11 +24,15 @@ for t = 1:size(tree_list,1)
                  modified = 0;
                  tree_aux = string_set(find(elements(t,:) == 1)); %#ok<FNDSB>
                  for w = 1:length(tree_aux)
-                            uncles = generating_uncles(tree_aux{1,w}, alphabet);
-                            % find where the uncles are in the string_set
-                            [elements_row, modified] = best_uncles_fit(pinpoint_uncleslocation(string_set, uncles), elements(t,:), string_set);
-                            if modified == 1
-                               elements(t,:) = elements_row; break
+                            w_next = tree_aux{1,w}; one_modification = 0;
+                            while ~isempty(w_next)
+                                   uncles = generating_uncles(w_next, alphabet);
+                                   % find where the uncles are in the string_set
+                                   [elements_row, one_modification] = best_uncles_fit(pinpoint_uncleslocation(string_set, uncles), elements(t,:), string_set);
+                                   if one_modification == 1
+                                      elements(t,:) = elements_row; modified = 1;
+                                   end
+                                w_next = gen_imsufix(w_next);
                             end
                  end
                  if modified == 0
@@ -61,51 +65,66 @@ end
 close(wbar)
 
 elements = elements( find(tree_list == 1),: ); %#ok<FNDSB>
-elements_full = elements_full( find(tree_list == 1),: ); %#ok<FNDSB>
-[elements, ia, ic] = unique(elements, 'rows');
-elements_full = elements_full(ia,:);
+elements = unique(elements, 'rows');
 
-% % Fix only childs : solution convert the tree to vertices tree, for
-% length greter than 1, if has a father but no brother, then is a only
-% child.
-% only_childs = 0;
-% while 1
-%     for t = 1:size(elements,1)
-%         for a = 1:size(elements,2)
-%             if elements(t,a) == 1
-%                father = gen_imsufix(string_set{1,a}); bro_count = 0;
-%                for b = 1:length(alphabet)
-%                    bro = [alphabet(b) father];
-%                    for c = 1:size(elements,2)
-%                        if elements(t,c) == 1
-%                           bro_count = bro_count + isequal(string_set{1,c}, bro);
-%                        end
-%                    end
-%                end
-%                if bro_count < 2
-%                   % possible child found
-%                   % test if it is
-%                   
-%                   % test if it is
-%                   elements(t,a) = 0; only_childs = 1;
-%                   for b = 1:size(elements,2)
-%                       if isequal(father, string_set{1,b})
-%                          elements(t,b) = 1;
-%                       end
-%                   end
-%                end
-%             end
-%         end
 
-%     end
-%     if only_childs == 0; break; end
-% end
+% building the vertices trees representation
+elements_vertices = zeros( size(elements,1), size(elements,2) );
+wbar = waitbar(0, 'Getting the vertice tree representation...');
+for t = 1:size(elements,1)
+    for w = 1:size(elements,2)
+        if elements(t,w) == 1
+           w_next = string_set{1,w};
+           while ~isempty(w_next)
+                  for s = 1:length(string_set)
+                      if isequal(string_set{1,s},w_next)
+                         elements_vertices(t,s) = 1;
+                      end
+                  end
+                  w_next = gen_imsufix(w_next);
+           end           
+        end
+    end
+    waitbar(t/size(elements,1),wbar)
+end
+close(wbar)
 
-% %Reasoning
-% for t = 1:length(tree_list)
-%     if tree_list(t,1) == 1
-%        draw_contexttree(string_set(elements_full(t,:)==1), alphabet, [0 0 0])
-%        pause
-%        close
-%     end
-% end
+% Removing only childs
+
+wbar = waitbar(0, 'Removing only childs...');
+for t = 1:size(elements,1)
+    while 1
+        modified = 0;
+        for w = 1:size(elements,2)
+            if elements(t,w) == 1
+               w_next = gen_imsufix(string_set{1,w});
+               occurance_count = 0; bro_list = [];
+               for b = 1:size(alphabet,2)
+                   bro = [alphabet(b) w_next]; bro_list = [bro_list; bro];
+                   for v = 1:size(elements,2)
+                       if elements_vertices(t,v) == 1
+                          if isequal(bro,string_set{1,v}); occurance_count = occurance_count+1;end
+                       end
+                   end
+               end
+               if occurance_count < 2 % found a only child
+                  elements(t,w) = 0; elements_vertices(t,w) = 0; modified = 1;
+                  for v = 1:size(elements,2)
+                      if isequal(string_set{1,v},w_next)
+                         elements(t,v) = 1; elements_vertices(t,v) = 1;
+                      end
+                  end
+               end
+            end
+        end
+        if modified == 0; break; end
+    end
+    waitbar(t/size(elements,1),wbar)
+end
+close(wbar)
+
+for t = 1:length(elements)
+       draw_contexttree(string_set(elements(t,:)==1), alphabet, [0 0 0])
+       pause
+       close
+end
