@@ -1,4 +1,4 @@
-height = 3;
+height = 4;
 alphabet = [0 1 2];
 pathtogit = '/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/ResearchCodes'; tau = 7; seq_length = 100;
 tree_file_address = [pathtogit '/files_for_reference/tree_behave' num2str(tau) '.txt' ];
@@ -7,6 +7,28 @@ seq = gentau_seq (alphabet, contexts, PM, seq_length);
 
 % construct the set that will be the basis for the procedure
 string_set = full_tree_with_vertices(alphabet, height);
+
+% new
+if height > 2
+   h= height;
+   while 1
+       new_string_set = {}; aux_add = 1;
+       for w = 1:length(string_set)
+           aux_w = string_set{1,w}; w_count = 1;
+           if length(aux_w) == h
+              [~, ~, w_count] = count_contexts({aux_w}, seq);
+           end
+           if w_count > 0
+              new_string_set{1,aux_add} = aux_w;
+              aux_add = aux_add + 1;
+           end
+       end
+   string_set = new_string_set;
+   h = h-1;
+   if h < 3; break;end
+   end
+end
+% new
 
 % detecting the branches
 brothers = indentifying_branches(string_set, height);
@@ -123,7 +145,9 @@ for t = 1:size(elements,1)
 end
 close(wbar)
 
-for t = 1:length(elements)
+elements = unique(elements,'rows');
+
+for t = 1:size(elements,1)
        draw_contexttree(string_set(elements(t,:)==1), alphabet, [0 0 0])
        pause
        close
