@@ -1,4 +1,4 @@
-height = 4;
+height = 5;
 alphabet = [0 1 2];
 pathtogit = '/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/ResearchCodes'; tau = 7; seq_length = 100;
 tree_file_address = [pathtogit '/files_for_reference/tree_behave' num2str(tau) '.txt' ];
@@ -8,30 +8,69 @@ seq = gentau_seq (alphabet, contexts, PM, seq_length);
 % construct the set that will be the basis for the procedure
 string_set = full_tree_with_vertices(alphabet, height);
 
-% new
-if height > 2
-   h= height;
-   while 1
-       new_string_set = {}; aux_add = 1;
-       for w = 1:length(string_set)
-           aux_w = string_set{1,w}; w_count = 1;
-           if length(aux_w) == h
-              [~, ~, w_count] = count_contexts({aux_w}, seq);
-           end
-           if w_count > 0
-              new_string_set{1,aux_add} = aux_w;
-              aux_add = aux_add + 1;
-           end
-       end
-   string_set = new_string_set;
-   h = h-1;
-   if h < 3; break;end
-   end
-end
-% new
-
 % detecting the branches
+
 brothers = indentifying_branches(string_set, height);
+
+% reducing the time of the procedure
+w_discard = []; aux_add = 1;
+for d = 2:(height-1)
+    chains = permwithrep([0 1 2], d);
+    for c = 1:size(chains)
+        [~, ~, occurance_count] = count_contexts({chains(c,:)}, seq);
+        if occurance_count == 0
+            w_discard{1,aux_add} = chains(c,:);
+            aux_add = aux_add + 1;
+        end
+    end
+end
+
+h = height; eliminate = [];
+while 1
+    for w = 1:length(brothers)
+        w_next = string_set{1,w};
+        disc = 0;
+        if length(w_next) == h
+           for w_alt = 1:length(w_discard)
+               if sufix_test(w_discard{1,w_alt},w_next)
+                  bro_list = find(brothers == brothers(w)); bro_count = 0;
+                  for br = 1:length(bro_list)
+                      bro_count = bro_count ...
+                          +sufix_test(w_discard{1,w_alt},string_set{1,bro_list(br)});
+                  end
+                  disc = floor( bro_count/length(bro_list) );
+                  if disc == 1; break; end
+               end
+           end
+           if disc == 1
+              eliminate = [eliminate brothers(w)];
+           end
+        end
+    end
+h = h-1;
+    if h < 3
+       break; 
+    end
+end
+
+eliminate = unique(eliminate);
+
+new_string_set = {};
+new_brothers = []; aux_add = 1;
+for b = 1:length(brothers)
+    if isempty(  find( eliminate == brothers(b) )  )
+       new_string_set{1,aux_add} = string_set{1,b};
+       new_brothers(1,aux_add) = brothers(b);
+       aux_add = aux_add + 1;
+    end
+end
+
+aux_rank = unique(new_brothers);
+for b = 1:length(new_brothers)    
+    new_brothers(b) = find(aux_rank == new_brothers(b));
+end
+string_set = new_string_set;
+brothers = new_brothers;
 
 % generate all combination of branches
 [tree_list, elements] = generating_subtrees(brothers, string_set);

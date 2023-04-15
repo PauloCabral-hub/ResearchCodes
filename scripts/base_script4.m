@@ -30,11 +30,13 @@ end
 
 
 %% preparing tree of maximum variability
+close all
+ms_factor = 30;
 
 load('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/data_files_r04/estimated_trees_epochs28032023.mat')
 num_part = size(est_trees,1);
 all_retrieved = {};
-ep = 3; aux_add = 1;
+ep = 1; aux_add = 1;
 for p = 1:size(est_trees,1)
     tree = est_trees{p,ep};
     for w = 1:size(tree,2)
@@ -230,28 +232,28 @@ for w = 1:length(all_retrieved)
     for t = 1:length(texts)
         bstring = texts(t).String;
         if isequal(astring,bstring)
-           plot(texts(t).Position(1), texts(t).Position(2),'ob','MarkerFaceColor','b','MarkerSize', (all_retcounts(1,w)/num_part)*40) 
+           plot(texts(t).Position(1), texts(t).Position(2),'ob','MarkerFaceColor','b','MarkerSize', (all_retcounts(1,w)/num_part)*ms_factor) 
         end
     end
 end
 
 null_marker = findobj('Type','text','String','null');
-plot(null_marker.Position(1), null_marker.Position(2),'ob','MarkerFaceColor','b','MarkerSize', (null_counts/num_part)*40) 
+plot(null_marker.Position(1), null_marker.Position(2),'ob','MarkerFaceColor','b','MarkerSize', (null_counts/num_part)*ms_factor) 
 
 texts = findobj('Type','text');
 for t = 1:length(texts)
     delete(texts(t))
 end
 %% Marking sizes
-
-all_retcounts = unique([all_retcounts null_counts]);
-g_ax = gca;
-xinterval = abs(g_ax.XLim(2)-g_ax.XLim(1));
-for c = 1:length(all_retcounts)
-    plot( min(g_ax.XLim)+c*xinterval/length(all_retcounts), max(g_ax.YLim),'ob','MarkerFaceColor','b','MarkerSize', (all_retcounts(1,c)/num_part)*40)
-    text(min(g_ax.XLim)+c*xinterval/length(all_retcounts)+ 0.425, max(g_ax.YLim), num2str(all_retcounts(1,c)))
+% openfig('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/simulation_data/delete_after_use.fig')
+g_ax = gca; max_show = 19;
+xinterval = abs( g_ax.XLim(2)-g_ax.XLim(1) );
+for c = 1:max_show
+    text(min(g_ax.XLim)+c*xinterval/num_part, max(g_ax.YLim)+0.15, num2str(c))
+    plot( min(g_ax.XLim)+c*xinterval/num_part, max(g_ax.YLim),'ob','MarkerFaceColor','b','MarkerSize', (c/num_part)*ms_factor)
 end
 
+saveas(gcf,['/home/roberto/Documents/pos-doc/article/painel2_parts/Modes/epoch' num2str(ep) '.png' ])
 %% Preparing the individual trees
 % preparing the figures
 set(0, 'DefaultFigureRenderer', 'painters')
