@@ -1,4 +1,4 @@
-% sbox_conection(A, x_name, y_name, tit, box_names,sig_dif, acsis)
+% sbox_conection(group_id, data,  x_name, y_name, tit, box_names, sig_dif, test, acsis)
 %
 % Draw a boxplot identifierwise. Also use komolgorov-smirnov test to verify
 % differences between the distributions. 
