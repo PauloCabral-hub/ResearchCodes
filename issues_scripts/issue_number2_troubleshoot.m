@@ -6,19 +6,28 @@ pathtogit = '/home/paulo/Documents/PauloPosDoc/Pos-Doc/ResearchCodes';
 
 % Arquivo a ser aberto com o pacote EEGLAB
 addpath('/home/paulo/Documents/PauloPosDoc/Pos-Doc/BagOfCodesAndData/eeglab2021.1')
+
+% Abrindo o EEGLAB
 eeglab
 
-% By inspection of the data in  ALLEEG structure the correction should be used.
+% No EEGLAB:
+% 1 - File > import data > using EEGLAB functions and plug-ins > From brain
+% vision recorder .vhdr or .ahdr file
+% 2 - Selecionar o dado.
+% 3 - Selecionar OK nas janelas seguintes.
+% 4 - Fechar janela do EEGLAB.
 
-% The structure of ALLEEG indicates that the number of trials is 291, not
-% 300
 
-ntrials = 291; fs = ALLEEG.srate; idnum = 1; tau = 13; correction = 0;
-[data, channels, EEGtimes, EEGsignals] = to_datamatrix(ALLEEG, ntrials, fs, idnum, tau, 0);
+% Por inspecao a estrutura ALLEEG.event a correcao NAO deve ser utilizada (parametro = 0). Se
+% qualquer dos marcadores em type apresentar dois espacos entre a letra e o
+% numero, entao o dado esta na formatacao anterior.
 
-GoalkeeperLab(data,pathtogit,ntrials,EEGsignals,fs,channels)
+% A estrutura em ALLEEG indica 291 trials, nao 300. O numero de trials pode
+% ser verificado calculando o numero de ocorrencias o evento 'G  1' enviado
+% pelo jogo no inicio de cada trial, exceto no primeiro (que e descartado em
+% funcao da ausencia da marcacador). 
 
-% Count the number of the events to see which is the problem.
+% Contando o numero de eventos 'G  1'
 
 occurrances = 0;
 for c = 1:length(ALLEEG.event)
@@ -26,3 +35,14 @@ for c = 1:length(ALLEEG.event)
        occurrances = occurrances +1;
     end
 end
+
+ntrials = occurances; fs = ALLEEG.srate; idnum = 1; tau = 13; correction = 0;
+[data, channels, EEGtimes, EEGsignals] = to_datamatrix(ALLEEG, ntrials, fs, idnum, tau, 0);
+
+% Dessa forma a funcao to_datamatrix funciona adequadamente, assim como a
+% GoalkeeperLab.
+
+GoalkeeperLab(data,pathtogit,ntrials,EEGsignals,fs,channels)
+
+
+
