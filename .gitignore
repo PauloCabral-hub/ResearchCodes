@@ -1,0 +1,5 @@
+# ignore the following files
+*.csv
+*.eeg
+*.vhdr
+*.vmrk
