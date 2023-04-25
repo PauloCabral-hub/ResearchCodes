@@ -1,103 +1,193 @@
-% estimating the context trees for response times
+height = 5;
+alphabet = [0 1 2];
+pathtogit = '/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/ResearchCodes'; tau = 7; seq_length = 100;
+tree_file_address = [pathtogit '/files_for_reference/tree_behave' num2str(tau) '.txt' ];
+[contexts, PM,~ , ~] = build_treePM (tree_file_address);
+seq = gentau_seq (alphabet, contexts, PM, seq_length);
 
-pathtogit = '/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/research_codes';
-addpath(genpath(pathtogit))
+% construct the set that will be the basis for the procedure
+string_set = full_tree_with_vertices(alphabet, height);
 
-% loading data
+% detecting the branches
 
-load('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/data_files_r02/valid_20092022.mat')
-load('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/thesis_data_r01/set2_matrix.mat')
+brothers = indentifying_branches(string_set, height);
 
-
-% processing
-est_trees = cell(sum(valid_p),1);
-aux = 1; wbar = waitbar(0,'Processing data, please wait...');
-for a = 1:length(valid_p)
-   if valid_p(a) == 1
-      [rt, chain] = get_rtimes(data, a, 101, 900, 7);
-      [tau_est] = tauest_RT(3, rt', chain', 0);
-      est_trees{aux,1} = tau_est;
-      aux = aux+1;
-      waitbar(a/sum(valid_p), wbar,'Processing data, please wait...')
-   end
+% reducing the time of the procedure
+w_discard = []; aux_add = 1;
+for d = 2:(height-1)
+    chains = permwithrep([0 1 2], d);
+    for c = 1:size(chains)
+        [~, ~, occurance_count] = count_contexts({chains(c,:)}, seq);
+        if occurance_count == 0
+            w_discard{1,aux_add} = chains(c,:);
+            aux_add = aux_add + 1;
+        end
+    end
 end
 
-% calculating the mode trees
-
-[mode_tau_full] = taumode_est(3, est_trees_full', floor(log10(1000)/log10(3)), 0, 0);
-[mode_tau] = taumode_est(3, est_trees_full', floor(log10(1000)/log10(3)), 0, 0);
-
-close all
-% preparing the figures
-set(0, 'DefaultFigureRenderer', 'painters')
-set(0, 'DefaultFigureColor', [1 1 1] )
-load('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/data_files_r04/estimated_trees27032023.mat')
-
-
-fig_trees = figure;
-for p = 19:22 %length(est_trees)
-    w = p-18;
-    subplot(3,3,w)
-    title(['p' num2str(p)])
-    tree = est_trees{p,1};
-    draw_contexttree(tree, [0 1 2], [0 0 0])
-    lines = findobj('Type','line');
-    texts = findobj('Type','text');
-    for l = 1:length(lines)
-       lines(l).LineWidth = 3;
+h = height; eliminate = [];
+while 1
+    for w = 1:length(brothers)
+        w_next = string_set{1,w};
+        disc = 0;
+        if length(w_next) == h
+           for w_alt = 1:length(w_discard)
+               if sufix_test(w_discard{1,w_alt},w_next)
+                  bro_list = find(brothers == brothers(w)); bro_count = 0;
+                  for br = 1:length(bro_list)
+                      bro_count = bro_count ...
+                          +sufix_test(w_discard{1,w_alt},string_set{1,bro_list(br)});
+                  end
+                  disc = floor( bro_count/length(bro_list) );
+                  if disc == 1; break; end
+               end
+           end
+           if disc == 1
+              eliminate = [eliminate brothers(w)];
+           end
+        end
     end
-    for t = 1:length(texts)
-       if length(texts(t).String) > 4
-          texts(t).FontSize = 8;
-       elseif length(texts(t).String) > 3
-       else
-          texts(t).FontSize = 12;
+h = h-1;
+    if h < 3
+       break; 
+    end
+end
+
+eliminate = unique(eliminate);
+
+new_string_set = {};
+new_brothers = []; aux_add = 1;
+for b = 1:length(brothers)
+    if isempty(  find( eliminate == brothers(b) )  )
+       new_string_set{1,aux_add} = string_set{1,b};
+       new_brothers(1,aux_add) = brothers(b);
+       aux_add = aux_add + 1;
+    end
+end
+
+aux_rank = unique(new_brothers);
+for b = 1:length(new_brothers)    
+    new_brothers(b) = find(aux_rank == new_brothers(b));
+end
+string_set = new_string_set;
+brothers = new_brothers;
+
+% generate all combination of branches
+[tree_list, elements] = generating_subtrees(brothers, string_set);
+
+% performing corrections
+wbar = waitbar(0, 'Rectifying trees...');
+for t = 1:size(tree_list,1)
+    if tree_list(t,1) == 1
+       % correction procedure
+       if ~isempty(string_set(find(elements(t,:) == 1))) %#ok<FNDSB>
+           while 1
+                 modified = 0;
+                 tree_aux = string_set(find(elements(t,:) == 1)); %#ok<FNDSB>
+                 for w = 1:length(tree_aux)
+                            w_next = tree_aux{1,w}; one_modification = 0;
+                            while ~isempty(w_next)
+                                   uncles = generating_uncles(w_next, alphabet);
+                                   % find where the uncles are in the string_set
+                                   [elements_row, one_modification] = best_uncles_fit(pinpoint_uncleslocation(string_set, uncles), elements(t,:), string_set);
+                                   if one_modification == 1
+                                      elements(t,:) = elements_row; modified = 1;
+                                   end
+                                w_next = gen_imsufix(w_next);
+                            end
+                 end
+                 if modified == 0
+                    break
+                 end
+           end
+       end  
+    end
+    waitbar(t/length(tree_list),wbar)
+end
+close(wbar)
+
+elements_full = elements;
+
+% rectifying according to the chain
+wbar = waitbar(0, 'Rectifying trees according to the chain...');
+for t = 1:length(tree_list)
+    if tree_list(t,1) == 1
+       for a = 1:size(elements,2)
+           if elements(t,a) == 1
+              [~, ~, occurance_count] = count_contexts(string_set(a), seq);
+              if occurance_count == 0
+                 elements(t,a) = 0; 
+              end
+           end
        end
     end
+    waitbar(t/length(tree_list),wbar)
 end
+close(wbar)
 
-% generating the methods figure
-subplot(2,3,1)
-adm_tree1 = {[1 1 0], [2 1 0], [0 1], [1 1], [2 1], [2]}; %#ok<NBRAK>
-adm_tree2 = {[1 0], [0 1], [1 1], [2 1], [2]}; %#ok<NBRAK>
-adm_tree3 = {[0], [0 1], [1 1], [2 1], [2]}; %#ok<NBRAK>
-adm_tree4 = {[1 1 0], [2 1 0], [0 1], [1 1], [2 1], [2]}; %#ok<NBRAK>
+elements = elements( find(tree_list == 1),: ); %#ok<FNDSB>
+elements = unique(elements, 'rows');
 
-for sub = 1:4
-    eval(['adm_tree = adm_tree' num2str(sub) ';'])
-    if sub == 4
-       aux_sub = sub+1;
-       subplot(2,3,aux_sub)
-    else
-       aux_sub = sub;
-       subplot(2,3,aux_sub) 
+
+% building the vertices trees representation
+elements_vertices = zeros( size(elements,1), size(elements,2) );
+wbar = waitbar(0, 'Getting the vertice tree representation...');
+for t = 1:size(elements,1)
+    for w = 1:size(elements,2)
+        if elements(t,w) == 1
+           w_next = string_set{1,w};
+           while ~isempty(w_next)
+                  for s = 1:length(string_set)
+                      if isequal(string_set{1,s},w_next)
+                         elements_vertices(t,s) = 1;
+                      end
+                  end
+                  w_next = gen_imsufix(w_next);
+           end           
+        end
     end
-    
-    draw_contexttree(adm_tree, [0 1 2], [0 0 0])
-    lines = findobj('Type','line');
-    texts = findobj('Type','text');
-    for l = 1:length(lines)
-       lines(l).LineWidth = 3;
-    end
-    for t = 1:length(texts)
-       if length(texts(t).String) > 4
-          texts(t).FontSize = 8;
-       elseif length(texts(t).String) > 3
-       else
-          texts(t).FontSize = 12;
-       end
-    end
+    waitbar(t/size(elements,1),wbar)
 end
+close(wbar)
 
+% Removing only childs
 
-% example prunning
+wbar = waitbar(0, 'Removing only childs...');
+for t = 1:size(elements,1)
+    while 1
+        modified = 0;
+        for w = 1:size(elements,2)
+            if elements(t,w) == 1
+               w_next = gen_imsufix(string_set{1,w});
+               occurance_count = 0; bro_list = [];
+               for b = 1:size(alphabet,2)
+                   bro = [alphabet(b) w_next]; bro_list = [bro_list; bro];
+                   for v = 1:size(elements,2)
+                       if elements_vertices(t,v) == 1
+                          if isequal(bro,string_set{1,v}); occurance_count = occurance_count+1;end
+                       end
+                   end
+               end
+               if occurance_count < 2 % found a only child
+                  elements(t,w) = 0; elements_vertices(t,w) = 0; modified = 1;
+                  for v = 1:size(elements,2)
+                      if isequal(string_set{1,v},w_next)
+                         elements(t,v) = 1; elements_vertices(t,v) = 1;
+                      end
+                  end
+               end
+            end
+        end
+        if modified == 0; break; end
+    end
+    waitbar(t/size(elements,1),wbar)
+end
+close(wbar)
 
-[rt, chain] = get_rtimes(data, 10, 101, 900, 7);
-contexts = {[1 1 0], [2 1 0]};
-[ct_posi, ct_pose, ctx_count] = count_contexts(contexts, chain');
-set_110 = rt(find(ct_pose(1,:) ~= 0)+1,1); set_110 = set_110(find(set_110 < 1.5));
-set_210 = rt(find(ct_pose(2,:) ~= 0)+1,1); set_210 = set_210(find(set_210 < 1.5));
-sbox_varsize([ones(1,length(set_110)) 2*ones(1,length(set_210))]', [set_110 ; set_210],  'strings', 'response times', '', {'110';'210'}, 0, 0, [])
-CA = gca;
-CA.XTickLabel = {'110'; '210'}; 
+elements = unique(elements,'rows');
 
+for t = 1:size(elements,1)
+       draw_contexttree(string_set(elements(t,:)==1), alphabet, [0 0 0])
+       pause
+       close
+end
