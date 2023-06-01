@@ -29,7 +29,7 @@ auxdata = []; auxgroup = [];
 groups = max(group_id);
 for a = 1:groups
    auxd = data(find(group_id == a),1);
-   %auxd = auxd(find(isoutlier(auxd) == 0),1); DISABLED FOR MATLAB2015
+   auxd = auxd(find(isoutlier(auxd) == 0),1); %DISABLED FOR MATLAB2015
    %VERSION
    auxdata = [auxdata; auxd];
    auxgroup = [auxgroup; a*ones(length(auxd),1)];
@@ -102,9 +102,9 @@ ax = gca;
 ax.XTick = 1:max(group_id);
 
 % DISABLED FOR MATLAB 2015 VERSION
-% for t = 1:length(ax.XTick)
-%     ax.XTickLabel{t,1} = box_names{t,1};
-% end
+for t = 1:length(ax.XTick)
+    ax.XTickLabel{t,1} = box_names{t,1};
+end
 
 xlabel(x_name, 'FontSize',14, 'Interpreter', 'Latex')
 ylabel(y_name, 'FontSize', 14, 'Interpreter', 'Latex')

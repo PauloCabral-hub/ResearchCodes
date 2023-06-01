@@ -1,12 +1,12 @@
 % estimating the context trees for response times
 
-pathtogit = '/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/research_codes';
+pathtogit = '/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/research_codes';
 addpath(genpath(pathtogit))
 
 % loading data
 
-load('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/data_files_r02/valid_20092022.mat')
-load('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/thesis_data_r01/set2_matrix.mat')
+load('/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_15042023/data_files_r02/valid_20092022.mat')
+load('/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_15042023/thesis_data_r01/set2_matrix.mat')
 
 
 % processing

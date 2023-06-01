@@ -13,8 +13,9 @@ ntrials = 1000;
 
 
 tau = 7; % choose the tree
-p = 12; % choose the participant
+p = 11; % choose the participant
 bwid = 0.0775; % choose the bin width
+w = 2;
 
 
 t_id = find(tauofid == tau);
@@ -46,7 +47,7 @@ end
 
 
 leg = cell(treesizes(find(trees==tau)),1); %#ok<FNDSB>
-for a = 1 %1:treesizes(find(trees==tau))
+for a = w %1:treesizes(find(trees==tau))
     fig = figure('units','normalized','outerposition',[0 0 1 1]);
     yyaxis left
     X1 = tau_repo1{p,a}; X2 = tau_repo2{p,a};
