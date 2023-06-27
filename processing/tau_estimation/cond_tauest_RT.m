@@ -1,20 +1,22 @@
-% [tau_est] = tauest_RT(alphal, rt, chain, show)
+% [tau_est] = cond_tauest_RT(alphal, rt, chain, show, cvec)
 %
-% This function returns the estimated tree from the chain of response
-% times and the stochastic chain .
+% This function returns returns the estimated tree from the chain of response
+% times and the stochastic chain conditioned to the vector in cvec.
 % INPUT: 
 % alphal = length of the alphabet of the stochastic chain
 % rt = chain of response times
 % chain = stochastic chain associated with rt
+% cvec = vector of zeros and ones indicating if the response time should or
+% should not be considered in the estimation procedure.
 % show = plots the estimated tree
 %
 % OUTPUT:
 % tau_est = cell with the contexts of the estimated tree
 %
-% Author: Paulo Roberto Cabral Passos Last Modified: 02/08/2020
+% Author: Paulo Roberto Cabral Passos Last Modified: 19/06/2023
 
 
-function [tau_est] = tauest_RT(alphal, rt, chain, show)
+function [tau_est] = cond_tauest_RT(alphal, rt, chain, show, cvec)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     A = zeros(1,alphal);
@@ -61,9 +63,9 @@ function [tau_est] = tauest_RT(alphal, rt, chain, show)
         % Pruning Procedure
             if ~isempty(pos)
                 if isempty(perm) % Root branch
-                    tau_est = cut_branch(perm,tau_est, pos, chain, rt);
+                    tau_est = cond_cut_branch(perm,tau_est, pos, chain, rt, cvec);
                 else % Other branches
-                    tau_est = cut_branch(perm(a,:),tau_est, pos, chain, rt);
+                    tau_est = cond_cut_branch(perm(a,:),tau_est, pos, chain, rt, cvec);
                 end
             end
         end

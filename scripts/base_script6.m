@@ -29,11 +29,13 @@ for p = 1:length(valid_p)
 end
 
 box = [];
-box_groups = [];
-for b = 1:length(contexts)
+box_groups = []; aux = 1;
+for b = [5 4 2 3 1]
     box = [box; meanrt_order(:,b)];
-    box_groups = [box_groups; b*ones(size(meanrt_order,1),1)];
+    box_groups = [box_groups; aux*ones(size(meanrt_order,1),1)];
+    aux = aux+1;
 end
 
-sbox_varsize(box, box_groups,  '', '', '', {'0';'01';'11';'21';'2'}, 0, 0, [])
+sbox_varsize(box_groups, box,  'context (w)', 'rank', '', {'2';'21';'01';'11';'0'}, 0, 0, [])
+ylim([0 6])
 axis square

@@ -1,27 +1,53 @@
-% estimating the context trees for response times per epoch
+% % FOR TESTING
+% tree = {[1], [1 2], [1 2 2], [2 2 2]};
+% label_contexts = 1;
+% vertices = {[1],[1 2], [2 2]};
+% vcounts = [5 2 2];
+% classes = [1 1 2];
+% null_class = 2;
+% null_count = 9;
+% string_seq = tikz_tree(tree, alphabet, 0, vertices, vcounts, null_count, classes, null_class);
+
+
+% estimating the conditioned context trees for response times per epoch
 
 pathtogit = '/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/ResearchCodes';
 addpath(genpath(pathtogit))
 
 % loading data
 
-load('/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_15042023/data_files_r02/valid_20092022.mat')
-load('/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_15042023/thesis_data_r01/set2_matrix.mat')
+load('/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_20062023/data_files_r02/valid_20092022.mat')
+load('/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_20062023/thesis_data_r01/set2_matrix.mat')
 
 epochs = [1 334; 335 664; 665 1000];
 
 % processing
 est_trees = cell(sum(valid_p), size(epochs,1));
 epoch_trees = cell(size(epochs,1),1);
+bar_top = size(epochs,1)*length(valid_p);
+bar_h = waitbar(0/bar_top,'wait...'); bar_aux = 0;
 for ep = 1:size(epochs,1)    
-    aux = 1;
+    aux = 1; 
     for a = 1:length(valid_p)
        if valid_p(a) == 1
-          [rt, chain] = get_rtimes(data, a, epochs(ep,1), epochs(ep,2), 7);
-          [tau_est] = tauest_RT(3, rt', chain', 0);
+          [rt, chain, responses] = get_rtimes_and_responses(data, a, epochs(ep,1), epochs(ep,2), 7);
+          %CONDITIONING
+          in_cvec = [];
+          % getting rid of 2 less frequent case
+          cvec = labeling_cvec(chain', responses', [2], 0, in_cvec, 0);
+          % getting rid of 21 less frequent case
+          cvec = labeling_cvec(chain', responses', [2 1], 1, cvec, 0);
+          % getting rid of 01 less frequent case
+          cvec = labeling_cvec(chain', responses', [0 1], 0, cvec, 1);
+          % getting rid of 11 less frequent case
+          cvec = labeling_cvec(chain', responses', [1 1], 1, cvec, 1);
+          %CONDITIONING
+          [tau_est] = cond_tauest_RT(3, rt', chain', 0, cvec);
           est_trees{aux,ep} = tau_est;
           aux = aux+1;
        end
+    bar_aux = bar_aux + 1;
+    waitbar(bar_aux/bar_top, bar_h, 'wait...')
     end
 % calculating the mode trees
 [epoch_trees{ep,1}] = taumode_est(3, est_trees', floor(log10(epochs(1,2))/log10(3)), 0, 0);
@@ -33,10 +59,10 @@ end
 close all
 ms_factor = 30;
 
-load('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/data_files_r04/estimated_trees_epochs28032023.mat')
+load('/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_20062023/data_files_r04/cestimated_trees_epochs20062023.mat')
 num_part = size(est_trees,1);
 all_retrieved = {};
-ep = 1; aux_add = 1;
+ep = 3; aux_add = 1;
 for p = 1:size(est_trees,1)
     tree = est_trees{p,ep};
     for w = 1:size(tree,2)
@@ -226,68 +252,40 @@ end
 
 
 %% Substituting the text by squares
-texts = findobj('Type','text');
+texts = findobj('Type','text'); nonctx = ones(1,length(texts));
 for w = 1:length(all_retrieved)
     astring = strrep(num2str( all_retrieved{1,w} ),' ','');
     for t = 1:length(texts)
         bstring = texts(t).String;
         if isequal(astring,bstring)
-           plot(texts(t).Position(1), texts(t).Position(2),'ob','MarkerFaceColor','b','MarkerSize', (all_retcounts(1,w)/num_part)*ms_factor) 
+           texts(t).String = all_retcounts(1,w);
+           texts(t).Color = 'red';
+           texts(t).FontSize = 14; 
+           nonctx(t) = 0;
+        end
+        if isequal(bstring,'null')
+           nonctx(t) = 0;
         end
     end
 end
 
 null_marker = findobj('Type','text','String','null');
-plot(null_marker.Position(1), null_marker.Position(2),'ob','MarkerFaceColor','b','MarkerSize', (null_counts/num_part)*ms_factor) 
+% plot(null_marker.Position(1), null_marker.Position(2),'ob','MarkerFaceColor','b','MarkerSize', (null_counts/num_part)*ms_factor) 
+null_marker.String = num2str(null_counts);
+null_marker.Color = 'red';
+null_marker.FontSize = 14; 
 
-texts = findobj('Type','text');
 for t = 1:length(texts)
-    delete(texts(t))
-end
-%% Marking sizes
-% openfig('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/simulation_data/delete_after_use.fig')
-g_ax = gca; max_show = 19;
-xinterval = abs( g_ax.XLim(2)-g_ax.XLim(1) );
-for c = 1:max_show
-    text(min(g_ax.XLim)+c*xinterval/num_part, max(g_ax.YLim)+0.15, num2str(c))
-    plot( min(g_ax.XLim)+c*xinterval/num_part, max(g_ax.YLim),'ob','MarkerFaceColor','b','MarkerSize', (c/num_part)*ms_factor)
-end
-
-saveas(gcf,['/home/roberto/Documents/pos-doc/article/painel2_parts/Modes/epoch' num2str(ep) '.png' ])
-%% Preparing the individual trees
-% preparing the figures
-set(0, 'DefaultFigureRenderer', 'painters')
-set(0, 'DefaultFigureColor', [1 1 1] )
-load('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/data_files_r04/estimated_trees_epochs28032023.mat')
-close all
-
-ep = 1; tit_tip = [2 5 8]; sub_tip = [1 2 3; 4 5 6; 7 8 9]; part_tip = [1 3; 4 6; 7 9; 10 12; 13 15; 16 18; 19 21; 22 22 ];
-fig_trees = figure;
-p_segment = 8;
-for p = part_tip(p_segment,1):part_tip(p_segment,2)
-    for ep = 1:3
-        w = sub_tip(p - part_tip(p_segment-1,2),ep);
-        subplot(3,3,w)
-        if sum(ep == tit_tip)
-           title(['p' num2str(p)])    
-        end
-        tree = est_trees{p,ep};
-        draw_contexttree(tree, [0 1 2], [0 0 0])
-        lines = findobj('Type','line');
-        texts = findobj('Type','text');
-        for l = 1:length(lines)
-            lines(l).LineWidth = 3;
-        end
-        for t = 1:length(texts)
-            if length(texts(t).String) > 4
-               texts(t).FontSize = 8;
-            elseif length(texts(t).String) > 3
-               texts(t).FontSize = 10;
-            else
-               texts(t).FontSize = 12;
-            end
-        end
+    if nonctx(t) == 1
+        delete(texts(t))
     end
 end
-
-saveas(gcf,['/home/roberto/Documents/pos-doc/article/painel2_parts/trees_part' num2str(part_tip(p_segment,1)) '-' num2str(part_tip(p_segment,2)) '.png' ])
+% %% Marking sizes
+% % openfig('/home/roberto/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_10092022/simulation_data/delete_after_use.fig')
+% g_ax = gca; max_show = 19;
+% xinterval = abs( g_ax.XLim(2)-g_ax.XLim(1) );
+% for c = 1:max_show
+%     text(min(g_ax.XLim)+c*xinterval/num_part, max(g_ax.YLim)+0.15, num2str(c))
+%     plot( min(g_ax.XLim)+c*xinterval/num_part, max(g_ax.YLim),'ob','MarkerFaceColor','b','MarkerSize', (c/num_part)*ms_factor)
+% end
+% 
