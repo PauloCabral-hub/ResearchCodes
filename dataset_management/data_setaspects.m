@@ -73,6 +73,14 @@ treesizes = zeros(length(trees),1);
 
 for a = 1:ntau
    tree_file_address = [pathtogit '/files_for_reference/tree_behave' num2str(trees(a)) '.txt' ];
+   % Path adjustment for windows
+   if ispc
+      for b = 1:length(tree_file_address)
+         if tree_file_address(b) == '/'
+            tree_file_address(b) = '\'; 
+         end
+      end
+   end
    [contexts, ~, ~, ~] = build_treePM (tree_file_address);
    treesizes(a) = length(contexts);
 end

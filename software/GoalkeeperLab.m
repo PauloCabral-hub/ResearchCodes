@@ -26,6 +26,7 @@ f.Position = [0 0 scrsize(3) scrsize(4)];
 
 
 %% Defining the fields and fields labels
+
 numfilds1 = 15;
 column1 = 0.92:-0.06:(0.92-numfilds1*(0.06));
 
@@ -33,6 +34,7 @@ column1 = 0.92:-0.06:(0.92-numfilds1*(0.06));
 lvolfield = uicontrol(f,'Style','text','String', 'VOLUNTEER:', 'FontWeight','bold','FontName','Palatino','FontSize',12);
 lvolfield.Units = 'normalized'; lvolfield.Position = [0.5 column1(1) 0.07 0.05];
 lvolfield.BackgroundColor = [1 1 1]; uicontrol(lvolfield); lvolfield.Tag = 'text_field1';
+
 % FIELD VOLUNTEER
 volfield = uicontrol(f,'Style','edit','Units','normalized'); 
 volfield.Position = [0.50625 column1(1) 0.06 0.02]; uicontrol(volfield); volfield.Tag = 'vol';
@@ -468,7 +470,7 @@ timereference.String = {'Pre-response','Post-response'}; timereference.Value = 2
         auxws = auxws+1;
         assignin('base','aux',auxws)
     else
-        display('Unable to save more distributions');
+        display('Unable to save more distributions'); %#ok<DISPLAYPROG>
         return
     end
     nl = length(evalin('base','sample'));
@@ -498,7 +500,7 @@ timereference.String = {'Pre-response','Post-response'}; timereference.Value = 2
 
 % SECUNDARY CALL (2)
 
-    function cleardists(cleard,~)
+    function cleardists(cleard,~) %#ok<INUSD>
         assignin('base','aux',0);
         assignin('base','dist',[]);
         assignin('base','groups',[]);
@@ -805,25 +807,43 @@ timereference.String = {'Pre-response','Post-response'}; timereference.Value = 2
         else
         end    
     taglabel = 'text_field';
-        for a = 1:18
+    a = 1;
+        while 1
             obj = findobj('Tag',[taglabel num2str(a)]);
-            obj.FontSize = strfig.FontChoice;
+            if ~isempty(obj)
+                obj.FontSize = strfig.FontChoice;
+            else
+                break
+            end
+            a = a +1;
         end
     taglabel = 'button';
-        for a = 1:6
+    a = 1;
+        while 1
             obj = findobj('Tag',[taglabel num2str(a)]);
-            obj.FontSize = strfig.FontChoice;
+            if ~isempty(obj)
+                obj.FontSize = strfig.FontChoice;
+            else
+                break
+            end
+            a = a +1;
         end
-        taglabel = 'misc';
-        for a = 1:3
+    taglabel = 'button';
+    a = 1;
+        while 1
             obj = findobj('Tag',[taglabel num2str(a)]);
-            obj.FontSize = strfig.FontChoice;
+            if ~isempty(obj)
+                obj.FontSize = strfig.FontChoice;
+            else
+                break
+            end
+            a = a +1;
         end
         for a = 1:size(edit_taglist,1)
             obj = findobj('Tag',edit_taglist{a,1});
             obj.FontSize = strfig.FontChoice;
         end        
-    end
+    end 
 ltotal = uicontrol(f,'Style','text','String', ''); ltotal.Units = 'normalized'; ltotal.Position = [0.236 0.448 0.15 0.025]; ltotal.BackgroundColor = [1 1 1]; uicontrol(ltotal);ltotal.Tag = 'total';
 ksresult = uicontrol(f,'Style','text','String', ''); ksresult.Units = 'normalized'; ksresult.Tag = 'ksresult'; ksresult.Position = [0.8101 0.2461 0.15 0.025]; ksresult.BackgroundColor = [1 1 1]; uicontrol(ksresult);
 end

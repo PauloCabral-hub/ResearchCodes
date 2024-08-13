@@ -4,18 +4,19 @@ set(0, 'DefaultFigureRenderer', 'painters');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-load('/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_15042023/thesis_data_r01/set2_matrix.mat')
-pathtogit = '/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/ResearchCodes';
-load('/home/paulocabral/Documents/pos-doc/pd_paulo_passos_neuromat/data_repository_15042023/thesis_data_r01/set2_valid_ids_27112021.mat')
+
+load('C:\Users\Cabral\Documents\pos_doc\thesis_data_r01\thesis_data_r01\set2_matrix.mat')
+pathtogit = 'C:\Users\Cabral\Documents\pos_doc\ResearchCodes';
+load('C:\Users\Cabral\Documents\pos_doc\thesis_data_r01\thesis_data_r01\set2_valid_ids_27112021.mat')
 
 ntrials = 1000;
 [ids, vids, tauofid, gametest, trees, treesizes] = data_setaspects(data, ntrials, pathtogit);
 
 
 tau = 7; % choose the tree
-p = 11; % choose the participant
+p = 4; % choose the participant
 bwid = 0.0775; % choose the bin width
-w = 2;
+w = 5;
 
 
 t_id = find(tauofid == tau);
@@ -24,14 +25,14 @@ tau_repo2 = cell(length(t_id),treesizes(find(trees==tau))); %#ok<FNDSB>
 counts_total1 = zeros(length(t_id),treesizes(find(trees==tau)));  %#ok<FNDSB>
 from = 100; till = 900; 
 cond1 = 0; cond2 = 1;
-last = 2;
+last = 0;
 
 limitingr = 1.5;
 limitingl = 0;
 for a = 1:length(t_id)
    tree_file_address = [ pathtogit '/files_for_reference/tree_behave' num2str(tau) '.txt' ];
    [ctx_rtime, ctx_er, ctx_resp, contexts, ctxrnds, ct_pos] = rtanderperctx(data, t_id(a), from, till, tree_file_address, 0, tau);
-   [chain,responses, times] = get_seqandresp(data,tau, ids(a), from, till);
+   [chain , responses, times] = get_seqandresp(data,tau, ids(a), from, till);
    [ctx_fer,ct_poscell] = lastwas_error(ct_pos, ctx_er, contexts, chain, responses,last);
    for b = 1:treesizes(find(trees == tau)) %#ok<FNDSB>
       % for erros or successes 

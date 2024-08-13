@@ -1,24 +1,25 @@
-% [X,Y,Z] = get_seqandresp(data,tau,id, start, stop)
+% [chain_seq, resp_seq, rt_seq] = get_seqandresp(data, tau, id, from, till)
 %
-% This function gets the response and conditioning sequence from data.
+% DESCRIPTION: Given the <data> matrix of the goalkeeper retrieves the 
+% sequences associated with the tree identified by <tree> of the participant
+% identified by <id> from position <from> to position <till>
 %
-% Input:
-% data = same data as in responsetimeandresponses
-% tau = integer indicating the tree in data.
-% id = id of the participant in data.
-% from = from which play it starts
-% till = to which play it goes
+% INPUT:
+% data = data matrix used in the goalkeeper lab
+% tree = index that identifies a given tree in files for reference
+% id = id of the participant
+% from = starting from position
+% till = ending in position
 %
-% Output:
-% X = column vector with the conditioning sequence
-% Y = column vector with the response sequence
-% Z = column vector with the response time sequence
+% OUTPUT:
+% chain_seq = conditioning sequence
+% resp_seq = sequence of responses
+% rt_seq = sequence of response times
 %
-% Author: Paulo Cabral Last Modified: 15/06/2020
+% AUTHOR: Paulo Cabral  DATE: 13/08/2024
 
 
-
-function [X,Y,Z] = get_seqandresp(data,tau, id, from, till)
+function [chain_seq, resp_seq, rt_seq] = get_seqandresp(data,tau, id, from, till)
 
 
 b = 0; e = 0;
@@ -30,28 +31,8 @@ for a = 1:length(data)
    end
 end
 
-X = data(b:e,9); 
-Y = data(b:e,8);
-Z = data(b:e,7);
+chain_seq = data(b:e,9); 
+resp_seq = data(b:e,8);
+rt_seq = data(b:e,7);
 
 end
-
-% Backup
-% function [X,Y,Z] = get_seqandresp(data,tau, id, from, till)
-% 
-% 
-% b = 0; e = 0;
-% for a = 1:length(data)
-%    if (data(a,3) == 1)&&((data(a,6) == id)&&(data(a,5) == tau))
-%         b = a+from-1;
-%         e = b+till-1;
-%         break;
-%    end
-% end
-% 
-% X = data(b:e,9); 
-% Y = data(b:e,8);
-% Z = data(b:e,7);
-% 
-% end
-
